@@ -153,13 +153,12 @@ pub fn futex<'tcx>(
                     Scalar::from_target_isize(0, this), // retval_succ
                     Scalar::from_target_isize(-1, this), // retval_timeout
                     dest.clone(),
-                    this.eval_libc("ETIMEDOUT"),
+                    LibcError("ETIMEDOUT"),
                 );
             } else {
                 // The futex value doesn't match the expected value, so we return failure
                 // right away without sleeping: -1 and errno set to EAGAIN.
-                let eagain = this.eval_libc("EAGAIN");
-                this.set_last_error(eagain)?;
+                this.set_last_error(LibcError("EAGAIN"))?;
                 this.write_scalar(Scalar::from_target_isize(-1, this), dest)?;
             }
         }

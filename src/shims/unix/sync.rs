@@ -855,8 +855,7 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
         {
             Some(duration) => duration,
             None => {
-                let einval = this.eval_libc("EINVAL");
-                this.write_scalar(einval, dest)?;
+                this.write_scalar(LibcError("EINVAL"), dest)?;
                 return interp_ok(());
             }
         };
@@ -873,7 +872,7 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
             mutex_id,
             Some((timeout_clock, TimeoutAnchor::Absolute, duration)),
             Scalar::from_i32(0),
-            this.eval_libc("ETIMEDOUT"), // retval_timeout
+            LibcError("ETIMEDOUT"), // retval_timeout
             dest.clone(),
         )?;
 

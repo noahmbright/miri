@@ -180,11 +180,11 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
                 let res = if this.pthread_setname_np(
                     thread,
                     this.read_scalar(name)?,
-                    this.eval_libc("MAXTHREADNAMESIZE").to_target_usize(this)?.try_into().unwrap(),
+                    LibcError("MAXTHREADNAMESIZE").to_target_usize(this)?.try_into().unwrap(),
                 )? {
                     Scalar::from_u32(0)
                 } else {
-                    this.eval_libc("ENAMETOOLONG")
+                    LibcError("ENAMETOOLONG")
                 };
                 // Contrary to the manpage, `pthread_setname_np` on macOS still
                 // returns an integer indicating success.
