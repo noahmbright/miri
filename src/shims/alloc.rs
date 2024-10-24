@@ -109,7 +109,7 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
         // Align must be power of 2, and also at least ptr-sized (POSIX rules).
         // But failure to adhere to this is not UB, it's an error condition.
         if !align.is_power_of_two() || align < this.pointer_size().bytes() {
-            interp_ok(LibcError("EINVAL"))
+            interp_ok(this.eval_libc("EINVAL"))
         } else {
             let ptr = this.allocate_ptr(
                 Size::from_bytes(size),

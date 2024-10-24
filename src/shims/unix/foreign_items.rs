@@ -652,10 +652,10 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
                 let chunk_size = CpuAffinityMask::chunk_size(this);
 
                 if this.ptr_is_null(mask)? {
-                    this.set_last_error_and_return(LibcError("EFAULT"), dest);
+                    this.set_last_error_and_return(LibcError("EFAULT"), dest)?;
                 } else if cpusetsize == 0 || cpusetsize.checked_rem(chunk_size).unwrap() != 0 {
                     // we only copy whole chunks of size_of::<c_ulong>()
-                    this.set_last_error_and_return(LibcError("EINVAL"), dest);
+                    this.set_last_error_and_return(LibcError("EINVAL"), dest)?;
                 } else if let Some(cpuset) = this.machine.thread_cpu_affinity.get(&thread_id) {
                     let cpuset = cpuset.clone();
                     // we only copy whole chunks of size_of::<c_ulong>()
@@ -664,7 +664,7 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
                     this.write_null(dest)?;
                 } else {
                     // The thread whose ID is pid could not be found
-                    this.set_last_error_and_return(LibcError("ESRCH"), dest);
+                    this.set_last_error_and_return(LibcError("ESRCH"), dest)?;
                 }
             }
             "sched_setaffinity" => {
@@ -689,7 +689,7 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
                 };
 
                 if this.ptr_is_null(mask)? {
-                    this.set_last_error_and_return(LibcError("EFAULT"), dest);
+                    this.set_last_error_and_return(LibcError("EFAULT"), dest)?;
                 } else {
                     // NOTE: cpusetsize might be smaller than `CpuAffinityMask::CPU_MASK_BYTES`.
                     // Any unspecified bytes are treated as zero here (none of the CPUs are configured).
@@ -705,7 +705,7 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
                         }
                         None => {
                             // The intersection between the mask and the available CPUs was empty.
-                            this.set_last_error_and_return(LibcError("EINVAL"), dest);
+                            this.set_last_error_and_return(LibcError("EINVAL"), dest)?;
                         }
                     }
                 }
@@ -761,7 +761,7 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
                 // macOS: https://keith.github.io/xcode-man-pages/getentropy.2.html
                 // Solaris/Illumos: https://illumos.org/man/3C/getentropy
                 if bufsize > 256 {
-                    this.set_last_error_and_return(LibcError("EIO"), dest);
+                    this.set_last_error_and_return(LibcError("EIO"), dest)?;
                 } else {
                     this.gen_random(buf, bufsize)?;
                     this.write_null(dest)?;
@@ -925,7 +925,7 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
                     this.write_null(dest)?;
                 } else {
                     this.write_null(&result)?;
-                    this.write_scalar(LibcError("ERANGE"), dest)?;
+                    this.write_scalar(this.eval_libc("ERANGE"), dest)?;
                 }
             }
 

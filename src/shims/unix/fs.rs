@@ -1031,7 +1031,7 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
         // Reject if isolation is enabled.
         if let IsolatedOp::Reject(reject_with) = this.machine.isolated_op {
             this.reject_in_isolation("`readdir`", reject_with)?;
-            this.set_last_error(LibcError("EBADF"));
+            this.set_last_error(LibcError("EBADF"))?;
             return interp_ok(Scalar::null_ptr(this));
         }
 
